@@ -1,0 +1,24 @@
+{
+  "fileType": "RadarTrack",
+  "format": "JSON",
+  "version": "1.0",
+  "units": { "range": "km", "azimuth": "deg", "elevation": "deg", "height": "m", "snr": "dB", "rcs": "dBsm", "speed": "m/s", "heading": "deg", "pri": "us" },
+  "tracks": [
+    {
+      "trackId": "TRK-001",
+      "records": [
+        { "timestamp": "2026-08-24T10:30:00Z", "time": "10:30:00", "range": 47, "azimuth": -18, "elevation": 3.92, "height": 620, "snr": 19.5, "rcs": -6.5, "speed": 129, "heading": 58, "pri": 1010 },
+        { "timestamp": "2026-08-24T10:30:01Z", "time": "10:30:01", "range": 47.85, "azimuth": -17.7, "elevation": 3.95, "height": 628.5, "snr": 20.3, "rcs": -6.54, "speed": 129.8, "heading": 59.4, "pri": 1012 },
+        { "timestamp": "2026-08-24T10:30:02Z", "time": "10:30:02", "range": 48.7, "azimuth": -17.4, "elevation": 3.97, "height": 637, "snr": 21, "rcs": -6.67, "speed": 130.5, "heading": 60.8, "pri": 1014 }
+      ]
+    },
+    {
+      "trackId": "TRK-002",
+      "records": [
+        { "timestamp": "2026-08-24T10:30:00Z", "time": "10:30:00", "range": 59, "azimuth": -11, "elevation": 4.72, "height": 740, "snr": 21, "rcs": -5.8, "speed": 138, "heading": 76, "pri": 1020 },
+        { "timestamp": "2026-08-24T10:30:01Z", "time": "10:30:01", "range": 59.9, "azimuth": -10.7, "elevation": 4.75, "height": 749, "snr": 21.8, "rcs": -5.84, "speed": 138.8, "heading": 77.4, "pri": 1022 },
+        { "timestamp": "2026-08-24T10:30:02Z", "time": "10:30:02", "range": 60.8, "azimuth": -10.4, "elevation": 4.77, "height": 758, "snr": 22.5, "rcs": -5.97, "speed": 139.5, "heading": 78.8, "pri": 1024 }
+      ]
+    }
+  ]
+}

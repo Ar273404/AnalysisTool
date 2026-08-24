@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f8fafc;
+  --panel: #ffffff;
+  --panel-alt: #f1f5f9;
+  --border: #e2e8f0;
+  --muted: #64748b;
+  --text: #0f172a;
+  --primary: #2563eb;
+  --primary-soft: #dbeafe;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --shadow: rgba(15, 23, 42, 0.08);
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  background: #edf2f7;
+  color: var(--text);
+  font-family: Inter, "Segoe UI", sans-serif;
+}
+
+html.theme-dark,
+html.theme-dark body,
+html.theme-dark #root {
+  background: #090d14;
+  color: #e5e7eb;
+}
+
+.theme-dark .app-shell,
+.theme-dark main {
+  background: #090d14 !important;
+  color: #e5e7eb;
+}
+
+.theme-dark .bg-white,
+.theme-dark .bg-white\/90 {
+  background-color: #111827 !important;
+}
+
+.theme-dark .bg-slate-50,
+.theme-dark .bg-slate-100 {
+  background-color: #172033 !important;
+}
+
+.theme-dark .text-slate-900,
+.theme-dark .text-slate-800,
+.theme-dark .text-slate-700 {
+  color: #f3f4f6 !important;
+}
+
+.theme-dark .text-slate-600,
+.theme-dark .text-slate-500 {
+  color: #aab5c5 !important;
+}
+
+.theme-dark .border-slate-200,
+.theme-dark .border-slate-300 {
+  border-color: #2b384d !important;
+}
+
+.theme-dark input,
+.theme-dark select,
+.theme-dark textarea {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #f3f4f6 !important;
+}
+
+.theme-dark .hover\:bg-white:hover {
+  background-color: #263248 !important;
+}
+
+body {
+  min-width: 1200px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+.status-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+@media (max-width: 1400px) {
+  body {
+    min-width: 1000px;
+  }
+}
