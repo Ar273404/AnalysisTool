@@ -1,12 +1,31 @@
 function normalizeRecord(row, trackId) {
   const normalizedRow = Object.fromEntries(
-    Object.entries(row).map(([key, value]) => [
-      key.toLowerCase().replace(/[\s_-]+/g, ""),
-      value,
-    ]),
+    Object.entries(row).map(([key, value]) => [normalizeKey(key), value]),
   );
-  const value = (key) =>
-    normalizedRow[key.toLowerCase().replace(/[\s_-]+/g, "")] ?? null;
+  const value = (key) => {
+    const aliases = {
+      timestamp: ["timestamp", "datetime", "datetimestamp", "date"],
+      time: ["time", "utctime", "utc", "timeutc"],
+      range: ["range", "distance", "rangevalue"],
+      height: ["height", "altitude", "alt"],
+      azimuth: ["azimuth", "az"],
+      elevation: ["elevation", "el"],
+      snr: ["snr", "signaltonoise", "signalnoise"],
+      rcs: ["rcs", "radarcrosssection"],
+      speed: ["speed", "velocity"],
+      heading: ["heading", "course"],
+      pri: ["pri", "pulserepetitioninterval"],
+    };
+    const candidates = (aliases[key] || [normalizeKey(key)]).map(normalizeKey);
+    const exact = candidates.find(
+      (candidate) => normalizedRow[candidate] != null,
+    );
+    if (exact) return normalizedRow[exact];
+    const matchingKey = Object.keys(normalizedRow).find((rowKey) =>
+      candidates.some((candidate) => rowKey.startsWith(candidate)),
+    );
+    return matchingKey ? normalizedRow[matchingKey] : null;
+  };
   const number = (key) => {
     const raw = value(key);
     if (raw === null || raw === "") return null;
@@ -53,14 +72,18 @@ export async function parseRadarTrackFile(file) {
     const lines = text.split(/\r?\n/).filter(Boolean);
     if (lines.length < 2)
       throw new Error("Unsupported radar format. Supply CSV or JSON records.");
-    const headers = lines[0].split(/[\t,;]/).map((header) => header.trim());
+    const delimiter = detectDelimiter(lines[0]);
+    const headers = parseDelimitedLine(lines[0], delimiter).map((header) =>
+      header.trim().replace(/^\uFEFF/, ""),
+    );
     const rows = lines
       .slice(1)
       .map((line) =>
         Object.fromEntries(
-          line
-            .split(/[\t,;]/)
-            .map((value, index) => [headers[index], value.trim()]),
+          parseDelimitedLine(line, delimiter).map((value, index) => [
+            headers[index],
+            value.trim(),
+          ]),
         ),
       );
     return normalizeRows(rows);
@@ -71,13 +94,15 @@ function normalizeRows(rows) {
   const groups = new Map();
   rows.forEach((row) => {
     const normalizedRow = Object.fromEntries(
-      Object.entries(row).map(([key, value]) => [
-        key.toLowerCase().replace(/[\s_-]+/g, ""),
-        value,
-      ]),
+      Object.entries(row).map(([key, value]) => [normalizeKey(key), value]),
     );
     const trackId = String(
-      normalizedRow.trackid ?? normalizedRow.track ?? normalizedRow.id ?? "",
+      normalizedRow.trackid ??
+        normalizedRow.track ??
+        normalizedRow.tracknumber ??
+        normalizedRow.trackno ??
+        normalizedRow.id ??
+        "",
     ).trim();
     if (!trackId) return;
     if (!groups.has(trackId)) groups.set(trackId, []);
@@ -87,6 +112,44 @@ function normalizeRows(rows) {
     trackId,
     records,
   }));
+}
+
+function normalizeKey(key) {
+  return String(key)
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function detectDelimiter(line) {
+  const candidates = [",", "\t", ";"];
+  return candidates.reduce(
+    (best, candidate) =>
+      line.split(candidate).length > line.split(best).length ? candidate : best,
+    ",",
+  );
+}
+
+function parseDelimitedLine(line, delimiter) {
+  const values = [];
+  let value = "";
+  let quoted = false;
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    if (character === '"' && line[index + 1] === '"' && quoted) {
+      value += '"';
+      index += 1;
+    } else if (character === '"') {
+      quoted = !quoted;
+    } else if (character === delimiter && !quoted) {
+      values.push(value);
+      value = "";
+    } else {
+      value += character;
+    }
+  }
+  values.push(value);
+  return values;
 }
 
 export function createDemoRadarTracks() {

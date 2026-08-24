@@ -435,7 +435,9 @@ function AnalysisTools() {
     );
   const resetOffset = () =>
     setOffset({ range: 0, azimuth: 0, elevation: 0, time: 0, enabled: false });
-  const radarPreview = selectedTracks[0]?.records || [];
+  const radarPreview = selectedTracks.flatMap((track) =>
+    track.records.map((record) => ({ ...record, trackId: track.trackId })),
+  );
 
   return (
     <div className="space-y-5 pb-8">
@@ -732,6 +734,7 @@ function AnalysisTools() {
               records={radarPreview}
               fields={[
                 ["timestamp", "Timestamp"],
+                ["trackId", "Track ID"],
                 ["range", "Range"],
                 ["azimuth", "Azimuth"],
                 ["elevation", "Elevation"],
