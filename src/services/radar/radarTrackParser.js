@@ -96,7 +96,7 @@ function normalizeRows(rows) {
     const normalizedRow = Object.fromEntries(
       Object.entries(row).map(([key, value]) => [normalizeKey(key), value]),
     );
-    const trackId = String(
+    const rawTrackId = String(
       normalizedRow.trackid ??
         normalizedRow.track ??
         normalizedRow.tracknumber ??
@@ -104,14 +104,13 @@ function normalizeRows(rows) {
         normalizedRow.id ??
         "",
     ).trim();
-    if (!trackId) return;
-    if (!groups.has(trackId)) groups.set(trackId, []);
-    groups.get(trackId).push(normalizeRecord(row, trackId));
+    if (!rawTrackId) return;
+    const groupKey = rawTrackId.toLowerCase();
+    const trackId = groups.get(groupKey)?.trackId || rawTrackId;
+    if (!groups.has(groupKey)) groups.set(groupKey, { trackId, records: [] });
+    groups.get(groupKey).records.push(normalizeRecord(row, trackId));
   });
-  return [...groups.entries()].map(([trackId, records]) => ({
-    trackId,
-    records,
-  }));
+  return [...groups.values()];
 }
 
 function normalizeKey(key) {

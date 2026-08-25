@@ -49,6 +49,36 @@ const inputClass =
   "w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100";
 const buttonClass =
   "inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50";
+const plotColors = [
+  "#2563eb",
+  "#e11d48",
+  "#059669",
+  "#d97706",
+  "#7c3aed",
+  "#0891b2",
+  "#65a30d",
+  "#db2777",
+];
+
+function offsetValue(value, key, offset) {
+  if (!Number.isFinite(Number(value))) return value;
+  return Number(value) + (offset.enabled ? Number(offset[key] || 0) : 0);
+}
+
+function offsetTimestamp(value, offset) {
+  if (!offset.enabled || !Number(offset.time) || value == null) return value;
+  const parsed = Date.parse(value);
+  if (Number.isFinite(parsed))
+    return new Date(parsed + Number(offset.time)).toISOString();
+  return value;
+}
+
+function chartSortValue(value) {
+  const numeric = Number(value);
+  if (Number.isFinite(numeric)) return numeric;
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : String(value ?? "");
+}
 
 function Panel({ title, eyebrow, children, className = "" }) {
   return (
@@ -153,7 +183,6 @@ function AnalysisTools() {
     demo: false,
   });
   const [plot, setPlot] = useState({
-    mode: "all",
     selected: [],
     result: null,
     error: "",
@@ -302,34 +331,46 @@ function AnalysisTools() {
   const visibleTracks = radar.tracks.filter((track) =>
     track.trackId.toLowerCase().includes(radarSearch.toLowerCase()),
   );
-  const activeTracks = plot.mode === "all" ? radar.tracks : selectedTracks;
+  const activeTracks = selectedTracks;
   const selectedOption = plot.selected.length
     ? plotOptions.find((option) => option[0] === plot.selected[0])
     : null;
   const chartData = useMemo(() => {
     if (!selectedOption) return [];
     const [, , xKey, yKey] = selectedOption;
-    return activeTracks.flatMap((track) =>
-      track.records
-        .map((record) => {
-          const value = record[yKey];
-          if (
-            value === null ||
-            value === "" ||
-            value === undefined ||
-            !Number.isFinite(Number(value))
-          )
-            return null;
-          return {
-            x: record[xKey],
-            [track.trackId]:
-              Number(value) +
-              (offset.enabled && yKey === "range" ? Number(offset.range) : 0),
-            timestamp: record.timestamp,
-          };
-        })
-        .filter(Boolean),
-    );
+    const rows = new Map();
+    const occurrencesByTrack = new Map();
+
+    activeTracks.forEach((track) => {
+      track.records.forEach((record) => {
+        const value = record[yKey];
+        if (
+          value === null ||
+          value === "" ||
+          value === undefined ||
+          !Number.isFinite(Number(value))
+        )
+          return;
+
+        const x = offsetTimestamp(record[xKey], offset);
+        const trackOccurrences = occurrencesByTrack.get(track.trackId) || {};
+        const occurrence = trackOccurrences[x] || 0;
+        trackOccurrences[x] = occurrence + 1;
+        occurrencesByTrack.set(track.trackId, trackOccurrences);
+
+        const rowKey = `${String(x)}::${occurrence}`;
+        const row = rows.get(rowKey) || { x, timestamp: record.timestamp };
+        row[track.trackId] = offsetValue(value, yKey, offset);
+        rows.set(rowKey, row);
+      });
+    });
+
+    return [...rows.values()].sort((first, second) => {
+      const order = chartSortValue(first.x) - chartSortValue(second.x);
+      return Number.isFinite(order)
+        ? order
+        : String(first.x).localeCompare(String(second.x));
+    });
   }, [activeTracks, selectedOption, offset]);
   const plotRadar = () => {
     if (!radar.tracks.length)
@@ -337,7 +378,7 @@ function AnalysisTools() {
         ...current,
         error: "Please extract a radar track file first.",
       }));
-    if (plot.mode === "selected" && !selectedTracks.length)
+    if (!selectedTracks.length)
       return setPlot((current) => ({
         ...current,
         error: "Please select at least one radar track.",
@@ -370,8 +411,8 @@ function AnalysisTools() {
         source: "gps",
         title: "GPS Trajectory",
         points: gps.processed.map((record) => ({
-          x: record.longitude,
-          GPS: record.latitude,
+          x: offsetValue(record.longitude, "azimuth", offset),
+          GPS: offsetValue(record.latitude, "elevation", offset),
           timestamp: record.timestamp,
         })),
         tracks: ["GPS"],
@@ -397,13 +438,13 @@ function AnalysisTools() {
         title: "GPS + Radar Range",
         points: [
           ...gps.processed.map((record) => ({
-            x: record.timestamp,
-            GPS: record.range,
+            x: offsetTimestamp(record.timestamp || record.time, offset),
+            GPS: offsetValue(record.range, "range", offset),
           })),
           ...activeTracks.flatMap((track) =>
             track.records.map((record) => ({
-              x: record.timestamp,
-              [track.trackId]: record.range,
+              x: offsetTimestamp(record.timestamp || record.time, offset),
+              [track.trackId]: offsetValue(record.range, "range", offset),
             })),
           ),
         ],
@@ -766,32 +807,10 @@ function AnalysisTools() {
         <div className="flex flex-wrap items-center gap-4 text-sm">
           <label className="flex items-center gap-2">
             <input
-              type="radio"
-              checked={plot.mode === "all"}
-              onChange={() =>
-                setPlot((current) => ({ ...current, mode: "all" }))
-              }
-            />
-            All Tracks
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="radio"
-              checked={plot.mode === "selected"}
-              onChange={() =>
-                setPlot((current) => ({ ...current, mode: "selected" }))
-              }
-            />
-            Select Tracks
-          </label>
-          <label className="flex items-center gap-2">
-            <input
               type="checkbox"
               checked={
-                plot.mode === "all"
-                  ? false
-                  : radar.selected.length === radar.tracks.length &&
-                    radar.tracks.length > 0
+                radar.selected.length === radar.tracks.length &&
+                radar.tracks.length > 0
               }
               onChange={(e) =>
                 setRadar((current) => ({
@@ -801,7 +820,6 @@ function AnalysisTools() {
                     : [],
                 }))
               }
-              disabled={plot.mode !== "selected"}
             />
             Select All
           </label>
@@ -894,9 +912,7 @@ function AnalysisTools() {
                       key={track}
                       type="monotone"
                       dataKey={track}
-                      stroke={
-                        ["#2563eb", "#e11d48", "#059669", "#d97706"][index % 4]
-                      }
+                      stroke={plotColors[index % plotColors.length]}
                       dot={false}
                       connectNulls
                     />

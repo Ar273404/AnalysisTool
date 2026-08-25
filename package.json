@@ -51,5 +51,9 @@
       "artifactName": "EngineeringAnalysisSuite-${version}.exe",
       "signAndEditExecutable": false
     }
+  },
+  "allowScripts": {
+    "electron@31.7.7": true,
+    "esbuild@0.21.5": true
   }
 }
