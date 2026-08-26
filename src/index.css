@@ -30,13 +30,13 @@ body,
 html.theme-dark,
 html.theme-dark body,
 html.theme-dark #root {
-  background: #090d14;
+  background: #1e293b;
   color: #e5e7eb;
 }
 
 .theme-dark .app-shell,
 .theme-dark main {
-  background: #090d14 !important;
+  background: #1e293b !important;
   color: #e5e7eb;
 }
 
@@ -76,6 +76,82 @@ html.theme-dark #root {
 
 .theme-dark .hover\:bg-white:hover {
   background-color: #263248 !important;
+}
+
+.theme-dark .data-reader-card {
+  background: #0f172a !important;
+  border-color: #475569 !important;
+  box-shadow: 0 24px 60px rgba(2, 6, 23, 0.35) !important;
+}
+
+.theme-dark .data-reader-content {
+  background: #0f172a;
+}
+
+.theme-dark .data-reader-channel {
+  background: #1e293b !important;
+  border-color: #475569 !important;
+}
+
+.theme-dark .data-reader-channel:hover {
+  background: #334155 !important;
+  border-color: #64748b !important;
+}
+
+.theme-dark .data-reader-channel-selected {
+  background: #164e63 !important;
+  border-color: #0891b2 !important;
+}
+
+.theme-dark .data-reader-channel span.bg-cyan-600 {
+  background-color: #06b6d4 !important;
+}
+
+.theme-dark .data-reader-channel span.bg-slate-200 {
+  background-color: #475569 !important;
+  color: #cbd5e1 !important;
+}
+
+.theme-dark .data-reader-stop {
+  background: #1e293b !important;
+  border-color: #475569 !important;
+  color: #e2e8f0 !important;
+}
+
+.theme-dark .data-reader-stop:hover {
+  background: #4c1d2a !important;
+  border-color: #fb7185 !important;
+  color: #fecdd3 !important;
+}
+
+.theme-dark .data-reader-error {
+  background: #4c1d2a !important;
+  border-color: #be123c !important;
+  color: #fecdd3 !important;
+}
+
+.theme-dark .utility-monitor {
+  background: #0f172a !important;
+  border-color: #475569 !important;
+}
+
+.theme-dark .utility-monitor thead {
+  background: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+.theme-dark .utility-monitor tbody tr {
+  border-color: #263449 !important;
+  color: #cbd5e1 !important;
+}
+
+.theme-dark .utility-monitor tbody tr:hover {
+  background: #164e63 !important;
+}
+
+.theme-dark .utility-monitor .bg-emerald-50 {
+  background: #064e3b !important;
+  color: #a7f3d0 !important;
 }
 
 body {

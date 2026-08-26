@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
+const { startServer, stopServer } = require("../backend/server");
 
 const isDev = !app.isPackaged;
 
@@ -32,6 +33,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  startServer();
   createWindow();
 
   app.on("activate", () => {
@@ -43,8 +45,14 @@ app.whenReady().then(() => {
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
-    app.quit();
+    stopServer().finally(() => app.quit());
   }
+});
+
+app.on("before-quit", (event) => {
+  if (process.platform === "darwin") return;
+  event.preventDefault();
+  stopServer().finally(() => app.exit(0));
 });
 
 ipcMain.handle("dialog:openFile", async () => {

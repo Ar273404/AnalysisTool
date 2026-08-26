@@ -55,13 +55,13 @@ function Home() {
               })}
             </div> */}
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-600">
+              <p className="text-[15px] font-bold uppercase tracking-[0.2em] text-blue-800">
                 Local Time
               </p>
-              <p className="mt-0.5 whitespace-nowrap text-sm font-semibold text-slate-800">
+              <p className="mt-0.5 whitespace-nowrap text-md font-semibold text-red-900">
                 {timeText}
               </p>
-              <p className="whitespace-nowrap text-[11px] text-slate-500">
+              <p className="whitespace-nowrap text-[13px] text-red-900">
                 {dateText}
               </p>
             </div>
